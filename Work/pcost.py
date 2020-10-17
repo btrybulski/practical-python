@@ -24,7 +24,8 @@ import csv
 import sys 
 
 def portfolio_cost(filename):
-    total_cost = 0
+    '''Computes the total cost (shares*price) of a series of portfolio transactions'''
+    total_cost = 0.0
     with open(filename, 'rt') as file: 
         rows = csv.reader(file)
         headers = next(rows)
