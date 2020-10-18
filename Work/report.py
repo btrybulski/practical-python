@@ -3,28 +3,34 @@
 # Exercise 2.4
 
 import csv
-from pprint import pprint 
+from pprint import pprint
 
 def read_portfolio(filename):
     portfolio = []
-    with open(filename) as f: 
+    with open(filename) as f:
         rows = csv.reader(f)
         headers = next(rows)
-        for row in rows: 
+        for row in rows:
             holding = {
-                'name': row[0], 
-                'shares': int(row[1]), 
+                'name': row[0],
+                'shares': int(row[1]),
                 'price': float(row[2])
             }
             portfolio.append(holding)
-    return portfolio 
+    return portfolio
 
-def read_prices(filename): 
-    portfolio = {} 
-    with open(filename) as f: 
+## bonus - think about how you could rewrite it with this pattern
+##headers = ['name','price','date','time','change','open','high','low','volume']
+##types = [str, float, str, str, float, float, float, float, int]
+##converted = [func(val) for func, val in zip(types, row)]
+##record = dict(zip(headers, converted))
+
+def read_prices(filename):
+    portfolio = {}
+    with open(filename) as f:
         rows = csv.reader(f)
-        for row in rows: 
-            try: 
+        for row in rows:
+            try:
                 name = row[0]
                 price = float(row[1])
                 portfolio[name] = price
@@ -34,7 +40,7 @@ def read_prices(filename):
 
 def make_report(portfolio, prices):
     report = []
-    for record in portfolio: 
+    for record in portfolio:
         name = record['name']
         shares = record['shares']
         price = record['price']
@@ -42,26 +48,33 @@ def make_report(portfolio, prices):
         report.append((name, shares, price, change))
     return report
 
-if __name__ == "__main__":
-    portfolio = read_portfolio('Data/portfolio.csv')
-    prices = read_prices('Data/prices.csv')
+def print_report(report):
+    headers = ('Name', 'Shares', 'Price', 'Change')
+    print(f'{headers[0]:>10s} {headers[1]:>10s} {headers[2]:>10s} {headers[3]:>10s}')
+    print('---------- ---------- ---------- -----------')
+    for name, shares, price, change in report:
+        price = '${:.2f}'.format(price)
+        print(f'{name:>10s} {shares:>10d} {price:>10s} {change:>10.2f}')
+
+def portfolio_report(portfolio_filename, prices_filename):
+    portfolio = read_portfolio(portfolio_filename)
+    prices = read_prices(prices_filename)
+
     total_cost = 0.0
-    for record in portfolio: 
-        total_cost += record['shares'] * record['price']
-    
-    total_value = 0.0 
-    for record in portfolio: 
-        total_value += record['shares'] * prices[record['name']]
-    
+    for record in portfolio:
+       total_cost += record['shares'] * record['price']
+
+    total_value = 0.0
+    for record in portfolio:
+       total_value += record['shares'] * prices[record['name']]
+
     print('Total cost', total_cost)
     print('Total value', total_value)
     print('Profit', round(total_value - total_cost, ndigits=2))
     print()
 
-    headers = ('Name', 'Shares', 'Price', 'Change')
-    print(f'{headers[0]:>10s} {headers[1]:>10s} {headers[2]:>10s} {headers[3]:>10s}')
-    print('---------- ---------- ---------- -----------')
     report = make_report(portfolio, prices)
-    for name, shares, price, change in report:
-        price = '${:.2f}'.format(price)
-        print(f'{name:>10s} {shares:>10d} {price:>10s} {change:>10.2f}')
+    print_report(report)
+
+if __name__ == "__main__":
+    portfolio_report('Data/portfolio.csv', 'Data/prices.csv')
